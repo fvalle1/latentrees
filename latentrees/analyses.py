@@ -27,6 +27,9 @@ class analyses():
     def model_generator(self):
         for model in self.models:
             yield model
+            
+    def append_model(self, *args, **kwargs):
+        self.models.append(model(*args, **kwargs))
         
     def __iter__(self):
         self.iterindex = -1
