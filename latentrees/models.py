@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger("latentrees")
 from latentrees.layers.layer import layer
 from latentrees.layers.first_layer import first_layer
                 
@@ -14,7 +16,7 @@ class model():
         self.levels[0].sample()
         for il,l in enumerate(range(self.L)):
             if il % (self.L/10) == 0:
-                print(il)
+                logger.info(il)
             new_layer = layer(f"l{il+1}", self.nl, distribution=self.distribution)
             self.levels.append(new_layer)
             new_layer.sample(self.layers[il])

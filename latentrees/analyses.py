@@ -1,3 +1,10 @@
+import logging,sys
+logger = logging.getLogger("latentrees")
+hdl = logging.StreamHandler(sys.stdout)
+hdl.setFormatter(logging.Formatter('(%(module)s) - [%(levelname)s]: %(message)s'))
+hdl.setLevel(logging.INFO)
+logger.addHandler(hdl)
+logger.setLevel(logging.INFO)
 from latentrees.models import model
 
 class analyses():
@@ -9,7 +16,7 @@ class analyses():
         import multiprocessing as mp
         def run_model(model):
             try:
-                print("Running ", model)
+                logger.info("Running {}".format(model))
                 model.run()
                 return True
             except:
