@@ -29,7 +29,13 @@ class analyses():
             yield model
             
     def append_model(self, *args, **kwargs):
-        self.models.append(model(*args, **kwargs))
+        if len(args) > 1:
+            if isinstance(args[0], model):
+                self.models.append(args[0])
+        else:
+            self.models.append(model(*args, **kwargs))
+        
+    
         
     def __iter__(self):
         self.iterindex = -1
@@ -42,7 +48,12 @@ class analyses():
         raise StopIteration
     
     def __getitem__(self, item):
-        return self.models[item]
+        if isinstance(int, item):
+            return self.models[item]
+        elif isinstance(str, item):
+            for model in self.models:
+                if model.name == item:
+                    return model
     
     def __len__(self):
         return len(self.models)
