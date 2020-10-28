@@ -48,9 +48,9 @@ class analyses():
         raise StopIteration
     
     def __getitem__(self, item):
-        if isinstance(int, item):
+        if isinstance(item, int):
             return self.models[item]
-        elif isinstance(str, item):
+        elif isinstance(item, str):
             for model in self.models:
                 if model.name == item:
                     return model
