@@ -22,6 +22,11 @@ class layer():
             self.distribution =  distribution
     
     def sample(self, previous_layer) -> None:
+        """
+        Run the first sampling
+        
+        :param layer previous_layer: previous layer of the hierarchy
+        """
         if len(previous_layer) < self.max_N_leaves:
             previous_nodes = previous_layer.nodes
         else:
@@ -31,14 +36,23 @@ class layer():
                 self.nodes.append(self.distribution(node))
     @property
     def sorted_nodes(self):
+        """
+        :return: sorted nodes
+        """
         return np.sort(self.nodes)[::-1]
     
     @property
     def average(self):
+        """
+        :return: average value of nodes
+        """
         return np.average(self.nodes)
     
     @property
     def median(self):
+        """
+        :return: median value of nodes
+        """
         return np.median(self.nodes)
       
     def __len__(self):

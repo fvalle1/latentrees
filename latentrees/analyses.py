@@ -8,12 +8,26 @@ logger.setLevel(logging.INFO)
 from latentrees.models import model
 
 class analyses():
+    """
+    Class to perform analysis on multiple models
+    """
     def __init__(self):
+        """
+        
+        Example
+        =========
+        
+        runtime = analyses()
+        runtime.append_model(model())
+        runtime.run()
+        """
         self.models = []
         self.iterindex = -1
         
     def run(self) -> None:
-        import multiprocessing as mp
+        """
+        Run all the models stored
+        """
         def run_model(model):
             try:
                 logger.info("Running {}".format(model))
@@ -29,14 +43,21 @@ class analyses():
         for model in self.models:
             yield model
             
-    def append_model(self, *args, **kwargs):
+    def append_model(self, *args, **kwargs)->None:
+        """
+        Add a model to the analyses
+        Parameters
+        
+        :param model: a model object
+        :param *args: to create a new model and append it
+        :return: None
+        """
         if len(args) > 1:
             if isinstance(args[0], model):
                 self.models.append(args[0])
         else:
             self.models.append(model(*args, **kwargs))
         
-    
         
     def __iter__(self):
         self.iterindex = -1
