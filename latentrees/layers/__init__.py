@@ -1,2 +1,2 @@
 from latentrees.layers.first_layer import *
-from latentrees.layer.layer import *
+from latentrees.layers.layer import *

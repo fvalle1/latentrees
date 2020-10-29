@@ -1,7 +1,7 @@
 from latentrees.layers.layer import layer
 
 class first_layer(layer): 
-    def sample(self, previous_layer):
+    def sample(self, previous_layer: layer):
         raise NotImplementedError("First layer cannot have a previous layer")
             
     def sample(self, first_mean = None) -> None:
