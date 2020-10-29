@@ -20,6 +20,7 @@ class analyses():
                 model.run()
                 return True
             except:
+                print(*sys.exc_info())
                 return False
             
         list(map(run_model, self.models))
