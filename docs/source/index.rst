@@ -10,7 +10,12 @@ Welcome to latentrees's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+The full documentation is hereby available
 
+.. toctree::
+  :maxdepth: 2
+  
+  latentrees
 
 Indices and tables
 ==================
@@ -18,21 +23,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. automodule:: latentrees
-.. autoclass:: latentrees.analyses
-	:members:
-
-.. autoclass:: latentrees.model
-	:members:
-
-..autoclass:: latentrees.node
-	:members:
-
-.. automodule:: latentrees.layers
-.. autoclass:: latentrees.layers.layer
-	:members:
-
-.. autoclass:: latentrees.layers.first_layer
-	:members:
-	:inherited-members:
