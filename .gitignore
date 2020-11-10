@@ -130,3 +130,5 @@ dmypy.json
 images/
 *.pkl
 .DS_Store
+*.pkl
+/analyses
