@@ -76,6 +76,9 @@ class analyses():
             for model in self.models:
                 if model.name == item:
                     return model
+                
+    def __contains__(self, item):
+        return item in [m.name for m in self.models]
     
     def __len__(self):
         return len(self.models)
