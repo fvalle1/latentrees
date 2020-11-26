@@ -50,7 +50,7 @@ using namespace std::chrono_literals;
 
     mtlpp::Library library = device.NewLibrary(shadersSrc, mtlpp::CompileOptions(), nullptr);
     assert(library);
-    mtlpp::Function sqrFunc = library.NewFunction("storyKernel");
+    mtlpp::Function sqrFunc = library.NewFunction("storyMersenne");
     assert(sqrFunc);
 
     mtlpp::ComputePipelineState computePipelineState = device.NewComputePipelineState(sqrFunc, nullptr);
