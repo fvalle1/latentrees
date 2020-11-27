@@ -44,7 +44,7 @@ using namespace std::chrono_literals;
           for (uint l = 0; l < 100; l++){
               float delta = 1.0 + sqrt(3.0)*abs(temp);
               float r = mers.rand();
-              temp = round(2*r*delta-abs(temp));
+              temp = round(2*r*delta+temp-delta);
               if(temp > 1000000000000000){
               temp = 1000000000000000;
               }
