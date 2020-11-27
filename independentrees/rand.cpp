@@ -6,6 +6,15 @@
 #include <thread>
 #include <cmath>
 
+void printStatus(uint16_t &iStat, bool &ended)
+{
+  while(!ended){
+    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::cout<<"\r"<<iStat;
+}
+  std::cout<<std::endl;
+}
+
 int main()
 {
 using namespace std::chrono_literals;
@@ -59,8 +68,9 @@ using namespace std::chrono_literals;
     mtlpp::CommandQueue commandQueue = device.NewCommandQueue();
     assert(commandQueue);
 
-    const uint32_t dataCount = 5000;
-    const uint16_t statistics = 1000;
+    const uint32_t dataCount = 1000;
+    const uint16_t statistics = 5000;
+    bool ended = false;
 
     mtlpp::Buffer inBuffer = device.NewBuffer(sizeof(float) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
     assert(inBuffer);
@@ -74,48 +84,56 @@ using namespace std::chrono_literals;
       std::cerr<<"File to store data not opened"<<std::endl;
       return -1;
     }
+
+    uint16_t i = 0;
+    auto statusThread = std::thread(printStatus, std::ref(i), std::ref(ended));
+    statusThread.detach();
+
     auto gpu_start = std::chrono::steady_clock::now();
-      for (auto i=0;i<statistics;i++){
-        // update input data
+    for (; i < statistics; i++)
+    {
+      // update input data
+      {
+        float *inData = static_cast<float *>(inBuffer.GetContents());
+        for (uint32_t j = 0; j < dataCount; j++)
+          inData[j] = i * dataCount + j;
+        inBuffer.DidModify(ns::Range(0, sizeof(float) * dataCount));
+      }
+
+      mtlpp::CommandBuffer commandBuffer = commandQueue.CommandBuffer();
+      assert(commandBuffer);
+
+      mtlpp::ComputeCommandEncoder commandEncoder = commandBuffer.ComputeCommandEncoder();
+      commandEncoder.SetBuffer(inBuffer, 0, 0);
+      commandEncoder.SetBuffer(outBuffer, 0, 1);
+      commandEncoder.SetComputePipelineState(computePipelineState);
+      commandEncoder.DispatchThreadgroups(
+          mtlpp::Size(1, 1, 1),
+          mtlpp::Size(dataCount, 1, 1));
+      commandEncoder.EndEncoding();
+
+      mtlpp::BlitCommandEncoder blitCommandEncoder = commandBuffer.BlitCommandEncoder();
+      blitCommandEncoder.Synchronize(outBuffer);
+      blitCommandEncoder.EndEncoding();
+
+      commandBuffer.Commit();
+      commandBuffer.WaitUntilCompleted();
+      // read the data
+      {
+        float *inData = static_cast<float *>(inBuffer.GetContents());
+        float *outData = static_cast<float *>(outBuffer.GetContents());
+        for (uint32_t j = 0; j < dataCount; j++)
         {
-            float* inData = static_cast<float*>(inBuffer.GetContents());
-            for (uint32_t j=0; j<dataCount; j++)
-                inData[j] = i*dataCount+j;
-            inBuffer.DidModify(ns::Range(0, sizeof(float) * dataCount));
-        }
-
-        mtlpp::CommandBuffer commandBuffer = commandQueue.CommandBuffer();
-        assert(commandBuffer);
-
-        mtlpp::ComputeCommandEncoder commandEncoder = commandBuffer.ComputeCommandEncoder();
-        commandEncoder.SetBuffer(inBuffer, 0, 0);
-        commandEncoder.SetBuffer(outBuffer, 0, 1);
-        commandEncoder.SetComputePipelineState(computePipelineState);
-        commandEncoder.DispatchThreadgroups(
-            mtlpp::Size(1, 1, 1),
-            mtlpp::Size(dataCount, 1, 1));
-        commandEncoder.EndEncoding();
-
-        mtlpp::BlitCommandEncoder blitCommandEncoder = commandBuffer.BlitCommandEncoder();
-        blitCommandEncoder.Synchronize(outBuffer);
-        blitCommandEncoder.EndEncoding();
-
-        commandBuffer.Commit();
-        commandBuffer.WaitUntilCompleted();
-        // read the data
-        {
-            float* inData = static_cast<float*>(inBuffer.GetContents());
-            float* outData = static_cast<float*>(outBuffer.GetContents());
-            for (uint32_t j=0; j<dataCount; j++){
-          		/*if (j%(dataCount/10)==0){
+          /*if (j%(dataCount/10)==0){
                           	printf("sqr(%g) = %g\n", inData[j], outData[j]);
           		}*/
-              dataFile<<outData[j]<<std::endl;
-            }
+          dataFile << outData[j] << std::endl;
+        }
       }
     }
 
     auto gpu_end = std::chrono::steady_clock::now();
+    ended = true;
     dataFile.close();
 
 
