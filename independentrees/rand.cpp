@@ -31,8 +31,8 @@ using namespace std::chrono_literals;
         using namespace metal;
 
         kernel void storyMersenne(
-            const device float *vIn [[ buffer(0) ]],
-            device float *vOut [[ buffer(1) ]],
+            const device uint *vIn [[ buffer(0) ]],
+            device int *vOut [[ buffer(1) ]],
             uint id[[ thread_position_in_grid ]]){
           
           mt19937 mers;
@@ -41,7 +41,7 @@ using namespace std::chrono_literals;
          
           float temp = 10.0;
 
-          for (uint l = 0; l < 50; l++){
+          for (uint l = 0; l < 100; l++){
               float delta = 1.0 + sqrt(3.0)*abs(temp);
               float r = mers.rand();
               temp = round(2*r*delta-abs(temp));
@@ -50,7 +50,7 @@ using namespace std::chrono_literals;
               }
           }
 
-          vOut[id] = temp;
+          vOut[id] = round(temp);
                   
         }
 
@@ -72,10 +72,10 @@ using namespace std::chrono_literals;
     const uint16_t statistics = 5000;
     bool ended = false;
 
-    mtlpp::Buffer inBuffer = device.NewBuffer(sizeof(float) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
+    mtlpp::Buffer inBuffer = device.NewBuffer(sizeof(uint32_t) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
     assert(inBuffer);
 
-    mtlpp::Buffer outBuffer = device.NewBuffer(sizeof(float) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
+    mtlpp::Buffer outBuffer = device.NewBuffer(sizeof(int) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
     assert(outBuffer);
 
     std::ofstream dataFile;
@@ -94,7 +94,7 @@ using namespace std::chrono_literals;
     {
       // update input data
       {
-        float *inData = static_cast<float *>(inBuffer.GetContents());
+        auto inData = static_cast<uint32_t *>(inBuffer.GetContents());
         for (uint32_t j = 0; j < dataCount; j++)
           inData[j] = i * dataCount + j;
         inBuffer.DidModify(ns::Range(0, sizeof(float) * dataCount));
@@ -120,8 +120,7 @@ using namespace std::chrono_literals;
       commandBuffer.WaitUntilCompleted();
       // read the data
       {
-        float *inData = static_cast<float *>(inBuffer.GetContents());
-        float *outData = static_cast<float *>(outBuffer.GetContents());
+        auto outData = static_cast<int *>(outBuffer.GetContents());
         for (uint32_t j = 0; j < dataCount; j++)
         {
           /*if (j%(dataCount/10)==0){
