@@ -4,15 +4,52 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
+#include <queue>
 #include <cmath>
 
-void printStatus(uint16_t &iStat, bool &ended)
+std::mutex m;
+
+template <typename T>
+void streamToFile(std::queue<T> &buffer, const uint32_t &dataCount, std::ofstream &dataFile, const bool &ended, const bool &pushing)
 {
-  while(!ended){
-    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    std::cout<<"\r"<<iStat;
+  //std::cout<<"Thread "<<std::this_thread::get_id()<<std::endl;
+  // read the data
+  m.lock();
+  int written = 0;
+  while (!ended)
+  {
+    if(pushing){
+      std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+      continue;
+    }
+    if(buffer.size()>0){
+        written++;
+        for (int i = 0; i < dataCount; i++) dataFile << buffer.front()[i] << std::endl;
+        delete[] buffer.front();
+        buffer.pop();
+   }
+  }
+
+  auto remaining = buffer.size();
+  std::cout << "I wrote " <<written <<" statistics"<< std::endl;
+  std::cout << "have to write "<<remaining <<" more"<< std::endl;
+  for (int e = 0; e < remaining; e++)
+  {
+    for (int i = 0; i < dataCount; i++) dataFile << buffer.front()[i] << std::endl;
+    delete[] buffer.front();
+    buffer.pop();
+  }
+
+  m.unlock();
 }
-  std::cout<<std::endl;
+
+void printStatus(uint32_t &status, bool &ended)
+{
+  while (!ended)
+  {
+    std::cout << "\r" << status;
+  }
+  std::cout << std::endl;
 }
 
 int main()
@@ -70,7 +107,6 @@ using namespace std::chrono_literals;
 
     const uint32_t dataCount = 1000;
     const uint16_t statistics = 5000;
-    bool ended = false;
 
     mtlpp::Buffer inBuffer = device.NewBuffer(sizeof(uint32_t) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
     assert(inBuffer);
@@ -85,16 +121,21 @@ using namespace std::chrono_literals;
       return -1;
     }
 
-    uint16_t i = 0;
-    auto statusThread = std::thread(printStatus, std::ref(i), std::ref(ended));
-    statusThread.detach();
+    uint32_t i = 0;
+    bool ended = false;
+    bool pushing = false;
+    auto tPrint = std::thread(printStatus, std::ref(i), std::ref(ended));
+    tPrint.detach();
+
+    std::queue<int*> buffer;
+    auto tWrite = std::thread(streamToFile<int *>, std::ref(buffer), std::ref(dataCount), std::ref(dataFile), std::ref(ended), std::ref(pushing));
 
     auto gpu_start = std::chrono::steady_clock::now();
     for (; i < statistics; i++)
     {
       // update input data
       {
-        auto inData = static_cast<uint32_t *>(inBuffer.GetContents());
+        float *inData = static_cast<float *>(inBuffer.GetContents());
         for (uint32_t j = 0; j < dataCount; j++)
           inData[j] = i * dataCount + j;
         inBuffer.DidModify(ns::Range(0, sizeof(float) * dataCount));
@@ -118,28 +159,37 @@ using namespace std::chrono_literals;
 
       commandBuffer.Commit();
       commandBuffer.WaitUntilCompleted();
-      // read the data
-      {
-        auto outData = static_cast<int *>(outBuffer.GetContents());
-        for (uint32_t j = 0; j < dataCount; j++)
+
+    
+        // read the data
         {
-          /*if (j%(dataCount/10)==0){
-                          	printf("sqr(%g) = %g\n", inData[j], outData[j]);
-          		}*/
-          dataFile << outData[j] << std::endl;
-        }
+            //float* inData = static_cast<float*>(inBuffer.GetContents());
+            auto outData = static_cast<int*>(outBuffer.GetContents());
+            // for (uint32_t j=0; j<dataCount; j++){
+          	// 	/*if (j%(dataCount/10)==0){
+            //               	printf("sqr(%g) = %g\n", inData[j], outData[j]);
+          	// 	}*/
+            //   dataFile<<outData[j]<<std::endl;
+            // }
+            pushing = true;
+            auto newplace = new int[dataCount];
+            std::memcpy(newplace, std::move(outData), dataCount*sizeof(int));
+            buffer.push(newplace);
+            pushing = false;
       }
     }
 
-    auto gpu_end = std::chrono::steady_clock::now();
     ended = true;
-    dataFile.close();
 
+  if (tWrite.joinable()){
+    std::cout<<std::endl<<"Waiting all threads to finish"<<std::endl;
+    tWrite.join();
+  };
 
+  auto gpu_end = std::chrono::steady_clock::now();
 
-    std::cout << "Time difference (GPU) = " << std::chrono::duration_cast<std::chrono::milliseconds> (gpu_end - gpu_start).count() << "[ms]" << std::endl;
+  dataFile.close();
 
-
-
-    return 0;
+  std::cout << "Time difference (GPU) = " << std::chrono::duration_cast<std::chrono::milliseconds>(gpu_end - gpu_start).count() << "[ms]" << std::endl;
+  return 0;
 }
