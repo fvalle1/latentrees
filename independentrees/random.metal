@@ -1,6 +1,8 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
+using namespace metal;
+
 uint wang_hash(uint seed)
 {
     seed = (seed ^ 61) ^ (seed >> 16);
@@ -34,7 +36,7 @@ kernel void storyKernel(
         float delta = 1.0 + sqrt(3.0)*abs(temp);
         rng_state = rand_xorshift(rng_state);
         float r = rng_state * (1.0 / 4294967296.0);
-        temp = round(2*r*delta-abs(temp));
+        temp = round(2*r*delta+temp-delta);
         if(temp > 1000000000000000){
         temp = 1000000000000000;
         }
