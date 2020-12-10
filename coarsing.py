@@ -1,4 +1,7 @@
-def pdf(vector: list) -> np.array:
+import numpy as np
+from scipy.stats import binned_statistic
+
+def pdfize(vector: list) -> np.array:
     """
     Estimate the probaility density function of a vector
     :param vector: list of numbers
@@ -20,7 +23,7 @@ def coarse(f):
     return wrapper
 
 @coarse
-def coarsing(vector: np.array, window = 4, function = lambda x: x.sum()) -> np.array:
+def coarse_vec(vector: np.array, window = 4, function = lambda x: x.sum()) -> np.array:
     """
     Function to apply coarsing to a vector
 
