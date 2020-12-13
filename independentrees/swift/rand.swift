@@ -44,12 +44,12 @@ for device in devices {
 
 let device = devices[0];
 
-let dataSize = 1000;
-let statistics = 5000;
+let dataSize = 1024;
+let statistics = 10;
 
 let compileOptions = MTLCompileOptions();
-let library_rand = try! String(contentsOfFile: "/Volumes/LaCie/phd/latentrees/independentrees/random.metal");
-let library_mersenne = try! String(contentsOfFile: "/Volumes/LaCie/phd/latentrees/independentrees/mersenne.metal");
+let library_rand = try! String(contentsOfFile: "/Volumes/LaCie/phd/latentrees/independentrees/swift/random.metal");
+let library_mersenne = try! String(contentsOfFile: "/Volumes/LaCie/phd/latentrees/independentrees/swift/mersenne.metal");
 
 let source = library_rand+library_mersenne+srcString;
 

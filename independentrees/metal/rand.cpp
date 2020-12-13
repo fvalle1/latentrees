@@ -105,8 +105,8 @@ using namespace std::chrono_literals;
     mtlpp::CommandQueue commandQueue = device.NewCommandQueue();
     assert(commandQueue);
 
-    const uint32_t dataCount = 1000;
-    const uint16_t statistics = 5000;
+    const uint32_t dataCount = 1024;
+    const uint16_t statistics = 10;
 
     mtlpp::Buffer inBuffer = device.NewBuffer(sizeof(uint32_t) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
     assert(inBuffer);
