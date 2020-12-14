@@ -124,7 +124,7 @@ int main(void) {
 
   for (i = 0; i< statistics; i++){
     for (int j = 0; j < DATA_SIZE; j++){
-      A[j] = j;
+      A[j] = j + i*DATA_SIZE;
     }
     err = clEnqueueWriteBuffer(commands, input, CL_TRUE, 0, sizeof(float) * DATA_SIZE, A, 0, NULL, NULL);
     if (err != 0)

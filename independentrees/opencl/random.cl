@@ -27,15 +27,13 @@ float absolute(float x){
 
 __kernel void storyMersenne(__global float *vIn, __global float *vOut, const unsigned int count  ){
     int id = get_global_id(0); 
-  //  mt19937 mers;
 
-    //mers.srand(vIn[id]);
     int rng_state = wang_hash(vIn[id]);
     float temp = 10.0;
 
     if(id < count){
 
-    for (int l = 0; l < 50; l++){
+    for (int l = 0; l < 5; l++){
         float delta = 1.0 + absolute(temp);
         rng_state = rand_xorshift(rng_state);
         float r = rng_state * (1.0 / 4294967296.0);
