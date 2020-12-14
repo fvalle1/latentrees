@@ -107,25 +107,25 @@ for istat in 0..<statistics{
     commandBuffer?.waitUntilCompleted();
 
 
-//     let outDataPtr = outBuffer?.contents().bindMemory(to: Int32.self, capacity: dataSize * MemoryLayout<Int32>.size);
-//     let outDataBuffer = UnsafeBufferPointer(start: outDataPtr, count: dataSize)
-//     let outData = Array(outDataBuffer);
+    let outDataPtr = outBuffer?.contents().bindMemory(to: Int32.self, capacity: dataSize * MemoryLayout<Int32>.size);
+    let outDataBuffer = UnsafeBufferPointer(start: outDataPtr, count: dataSize)
+    let outData = Array(outDataBuffer);
 
 
-//   if let fileHandle = FileHandle(forWritingAtPath: fileUrl.path) {
-//       fileHandle.seekToEndOfFile()
-//     for out in outData{
-//         guard let data = (String(out)+"\n").data(using: String.Encoding.utf8) else {
-//             throw FileWriteError.convertToDataIssue
-//         }
-//         fileHandle.write(data)
-//     }
-//   }else{
-//     for out in outData{
-//         let text = String(out)+"\n";
-//         try text.write(to: fileUrl, atomically: false, encoding: String.Encoding.utf8)
-//     }
-//   }
+  if let fileHandle = FileHandle(forWritingAtPath: fileUrl.path) {
+      fileHandle.seekToEndOfFile()
+    for out in outData{
+        guard let data = (String(out)+"\n").data(using: String.Encoding.utf8) else {
+            throw FileWriteError.convertToDataIssue
+        }
+        fileHandle.write(data)
+    }
+  }else{
+    for out in outData{
+        let text = String(out)+"\n";
+        try text.write(to: fileUrl, atomically: false, encoding: String.Encoding.utf8)
+    }
+  }
 
 }
 
