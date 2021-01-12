@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: C/C++ Metal
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: clean
       run: make clean
-      working-directory: independentrees
+      working-directory: independentrees/metal
     - name: make
       run: make all
-      working-directory: independentrees
+      working-directory: independentrees/metal
