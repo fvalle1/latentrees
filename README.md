@@ -2,8 +2,6 @@
 ![C/C++ Metal](https://github.com/fvalle1/latentrees/workflows/C/C++%20Metal/badge.svg)
 ![C/C++ OpenCL](https://github.com/fvalle1/latentrees/workflows/C/C++%20OpenCL/badge.svg)
 
-![C/C++ CI](https://github.com/fvalle1/latentrees/workflows/C/C++%20CI/badge.svg)
-
 # latentrees
 Latent variable hierarchical model
 
