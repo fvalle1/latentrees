@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+images/
+*.pkl
+.DS_Store
+*.pkl
+/analyses
+randoms.dat
+
+TEST_latentrees.ipynb
+.vscode/
