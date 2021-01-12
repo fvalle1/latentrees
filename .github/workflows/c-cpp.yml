@@ -1,0 +1,21 @@
+name: C/C++ Metal
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: macos-11.0
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: clean
+      run: make clean
+      working-directory: independentrees/metal
+    - name: make
+      run: make all
+      working-directory: independentrees/metal
