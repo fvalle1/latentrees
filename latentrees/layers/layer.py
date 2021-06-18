@@ -12,9 +12,11 @@ class layer():
         self.rng = rng
         self.max_N_leaves = 10000
         def default_distribution(node:node):
-            m = node + 2
-            n = m/(m-1)
-            p = 1/m
+            if node < 1:
+                return None
+            m = node + 0
+            n = m / (m - 1 + 1e-15)
+            p = 1. / (m + 1e-15)
             return self.rng.negative_binomial(n,p)
         if distribution is None:
             self.distribution = default_distribution
@@ -33,7 +35,9 @@ class layer():
             previous_nodes = np.random.choice(previous_layer.nodes, size=self.max_N_leaves, replace=False)
         for node in previous_nodes:
             for _ in range(self.nl):
-                self.nodes.append(self.distribution(node))
+                new_node = self.distribution(node)
+                if new_node is not None:
+                    self.nodes.append(new_node)
     @property
     def sorted_nodes(self):
         """
