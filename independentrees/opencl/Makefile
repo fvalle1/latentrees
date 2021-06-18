@@ -5,7 +5,7 @@ FLAGS = -std=c++17 -O3
 INCLUDE = -I/users/filippovalle/Developer/pcg-cpp/include
 FRAMEWORKS = OpenCL
 
-all: test.out rand.out
+all: rand.out
 
 %.out: %.o LocalDevices.o
 	clang++ $(FLAGS) $(LIBS) -framework $(FRAMEWORKS) $^ -o $@
