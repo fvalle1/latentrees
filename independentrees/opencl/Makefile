@@ -2,13 +2,14 @@ CXX = clang++
 
 LIBS = -L.
 FLAGS = -std=c++17 -O3
-INCLUDE = -I/users/filippovalle/Developer/pcg-cpp/include
+INCLUDE = -I../pcg-cpp/include
 FRAMEWORKS = OpenCL
 
 all: rand.out
 
 %.out: %.o LocalDevices.o
-	clang++ $(FLAGS) $(LIBS) -framework $(FRAMEWORKS) $^ -o $@
+	# $(CXX) $(FLAGS) $(LIBS) -framework $(FRAMEWORKS) $^ -o $@
+	$(CXX) $(FLAGS) $(LIBS) $^ -o $@ -lm -pthread -lOpenCL
 
 %.o: %.cpp
 	$(CXX) -c $(FLAGS) $(INCLUDE) $< -o $@

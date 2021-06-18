@@ -4,4 +4,4 @@ from latentrees.analyses import *
 import latentrees.layers
 from latentrees.layers import rng
 
-__version__="0.0.0.1"
+__version__="0.1.0"
