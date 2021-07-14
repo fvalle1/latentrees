@@ -9,3 +9,5 @@ build/
 *.dat
 ._*
 .vscode/
+*.icloud
+*.DS_Store
