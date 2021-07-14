@@ -1,0 +1,11 @@
+build/
+*.o
+*.so
+*.d
+*.out
+*.pdf
+*.png
+*.csv
+*.dat
+._*
+.vscode/
