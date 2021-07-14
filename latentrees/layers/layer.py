@@ -14,9 +14,10 @@ class layer():
         def default_distribution(node:node):
             if node < 1:
                 return None
-            m = node + 0
-            n = m / (m - 1 + 1e-15)
-            p = 1. / (m + 1e-15)
+            alpha = 2.
+            m = node + 1e-15
+            n = m / (m**alpha - m + 0)
+            p = 1. / (m**alpha + 0)
             return self.rng.negative_binomial(n,p)
         if distribution is None:
             self.distribution = default_distribution
