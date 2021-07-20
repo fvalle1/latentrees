@@ -1,13 +1,14 @@
+CC = clang
 CXX=clang++
-CFLAGS=-std=c++17 -O3
-LDFLAGS=-pthread
-OBJ=generator.o model.o uniformModel.o gausModel.o nbinModel.o
-INCLUDE=-I../pcg-cpp/include -Imodels/interfaces -Imodels/include
+CFLAGS=-std=c++17 -O3 -Xclang -fopenmp
+LDFLAGS=-pthread -lomp
+OBJ=generator.o monitorThread.o model.o uniformModel.o gausModel.o nbinModel.o gammaModel.o
+INCLUDE=-I../pcg-cpp/include -Imodels/interfaces -Imodels/include -Iinclude/
 
 lat.out: main.cpp $(OBJ)
 	$(CXX) $(INCLUDE) $(CFLAGS) $(LDFLAGS) $^ $(OBJ) -o $@
 
-%.o: %.cpp
+%.o: src/%.cpp
 	$(CXX) $(INCLUDE) $(CFLAGS) -c $< -o $@
 
 %.o: models/%.cpp

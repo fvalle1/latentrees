@@ -4,5 +4,6 @@
 #include "uniformModel.h"
 #include "gausModel.h"
 #include "nbinModel.h"
+#include "gammaModel.h"
 
 #endif

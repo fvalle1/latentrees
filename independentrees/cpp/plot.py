@@ -4,7 +4,8 @@ import numpy as np
 
 data = np.genfromtxt("data.csv")
 
-cnts = np.random.choice(data[data > 0], size=10000, replace=False)
+#cnts = np.random.choice(data[data > 0], size=50000, replace=False)
+cnts = data[data>0]
 cnts = np.sort(cnts)[::-1]
 cnts = cnts/np.sum(cnts)
 
@@ -21,7 +22,7 @@ fig.add_traces([
     go.Scatter(x = np.linspace(1, 1+len(data)), 
                y = fit_func(np.linspace(1, 1+len(data)), *popt), 
                #y = 1e-1/np.linspace(1, 1+len(data)),
-               line={"width": 5, "dash": "dash"}, name=f"x^-{round(popt[1],2)}"),
+               line={"width": 5, "dash": "dash"}, name=f"x^{round(popt[1],2)}"),
     go.Scatter(x=np.linspace(1, 1+len(data)),
                y = 1e-1/np.linspace(1, 1+len(data)),
                line={"width": 5, "dash": "dash", "color":"gray"}, name=f"1/x")
@@ -33,4 +34,4 @@ fig.update_layout({
 })
 
 fig.show()
-fig.write_image("independent_nbinom.pdf", engine="kaleido")
+fig.write_image("independent_norm.pdf", engine="kaleido")
