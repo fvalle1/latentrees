@@ -1,0 +1,4 @@
+outs:
+- md5: 7936d3269a7201579703969bbd0546fb
+  size: 271590
+  path: nbinom.csv
