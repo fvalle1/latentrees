@@ -45,9 +45,9 @@ void makeSingleStory(std::ofstream &file, const T& first, TT &monitor){
 }
 
 template <typename T, typename TT, class TGenerator, class TModel>
-void makeStories(std::ofstream &file, const T first, TT &monitorVal)
+void makeStories(std::ofstream &file, const T first, TT &monitorVal, const TT nStories)
 {
-    for (int story = 0; story < 10000; story++)
+    for (int story = 0; story < nStories; story++)
     {
         makeSingleStory<T, TT, TGenerator, TModel>(file, first, monitorVal);
     }
@@ -55,21 +55,23 @@ void makeStories(std::ofstream &file, const T first, TT &monitorVal)
 
 #ifndef _OPENMP
 template <typename TData, class TGenerator, class TModel>
-void run(uint8_t n_threads = 12)
+void run(int nStories = 120000, int nThreads = 12)
 {
     auto file = std::ofstream("data.csv", std::ios::out);
 
     auto threads = std::vector<std::thread>();
-    threads.reserve(n_threads);
-    unsigned int monitor_val = 0;
+    threads.reserve(nThreads);
+
+    typedef unsigned int TMonitorData;
+    TMonitorData monitor_val = 0;
     const unsigned int first = 10;
     bool ended = false;
 
-    MonitorThread(monitor_val, ended).detach();
+    MonitorThread<TMonitorData>(monitor_val, ended, nStories).detach();
 
-    for (size_t i = 0; i < n_threads; i++)
+    for (size_t i = 0; i < nThreads; i++)
     {
-        threads.push_back(std::thread(makeStories<TData, unsigned int, TGenerator, TModel>, std::ref(file), first, std::ref(monitor_val)));
+        threads.push_back(std::thread(makeStories<TData, TMonitorData, TGenerator, TModel>, std::ref(file), first, std::ref(monitor_val), nStories / nThreads));
     }
 
     for (auto &thread : threads)
@@ -84,9 +86,9 @@ void run(uint8_t n_threads = 12)
 
 #else
 template <typename TData, class TGenerator, class TModel>
-void run(uint8_t n_threads = 12)
+void run(int nStories = 120000, int nThreads = 12)
 {
-    omp_set_num_threads(n_threads);
+    omp_set_num_threads(nThreads);
     auto file = std::ofstream("data.csv", std::ios::out);
 
     unsigned int monitorVal = 0;
@@ -100,7 +102,7 @@ void run(uint8_t n_threads = 12)
     MonitorThread(monitorVal, ended).detach();
 
 #pragma omp parallel for
-    for (int story = 0; story < 10000 * n_threads; story++)
+    for (int story = 0; story < nStories; story++)
     {
         makeSingleStory<TData, unsigned int, TGenerator, TModel>(file, first, monitorVal);
     }

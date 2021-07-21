@@ -15,7 +15,7 @@ public:
         //mu=alpha*beta
         //std2 = alpha*beta*beta
         auto alpha = 1;
-        auto beta = m+0.5;
+        auto beta = m+0.1;
         auto dist = TDistribution(alpha, beta);
 
         return generator->get_next(dist);
