@@ -93,7 +93,7 @@ int main(void) {
   }
 
   const uint32_t DATA_SIZE = 1024;
-  const uint16_t statistics = 10;
+  const uint16_t statistics = 1000;
 
   //cl_program program = clCreateProgramWithSource(context, 1, (const char **) & KernelSource, NULL, &err);
   clBuildProgram(program, 0, NULL, NULL, NULL, NULL);

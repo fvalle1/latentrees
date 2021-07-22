@@ -66,9 +66,11 @@ int main()
   std::ifstream shaderFile("shader.metal");
   char *shadersSrc = new char[582];
   shaderFile.read(shadersSrc, 582);
+  shaderFile.close();
   std::cout << shadersSrc << std::endl;
 
   mtlpp::Library library = device.NewLibrary((const char *)shadersSrc, mtlpp::CompileOptions(), nullptr);
+  delete[] shadersSrc;
   assert(library);
   mtlpp::Function sqrFunc = library.NewFunction("storyMersenne");
   assert(sqrFunc);

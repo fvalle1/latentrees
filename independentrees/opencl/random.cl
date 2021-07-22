@@ -33,8 +33,8 @@ __kernel void storyMersenne(__global float *vIn, __global float *vOut, const uns
 
     if(id < count){
 
-    for (int l = 0; l < 5; l++){
-        float delta = 1.0 + absolute(temp);
+    for (int l = 0; l < 50; l++){
+        float delta = 1.0 + 1.73 * absolute(temp);
         rng_state = rand_xorshift(rng_state);
         float r = rng_state * (1.0 / 4294967296.0);
         temp = round(2*r*delta+temp-delta);
