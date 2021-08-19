@@ -23,7 +23,7 @@ popt, pcov = curve_fit(fit_func, x, cnts, p0=(0.1,-1.5), bounds=([0.0001, -3],[0
 
 fig = go.Figure()
 fig.add_traces([
-    go.Scatter(x=x, y=cnts, line={"width":5}, name="data"),
+    go.Scatter(x=x, y=cnts, line={"width":5}, name="data (alpha=2)"),
     # go.Scatter(x=x, y=cnts1, line={"width":5}, name="data"),
     go.Scatter(x = np.linspace(1, 1+len(data)), 
                y = fit_func(np.linspace(1, 1+len(data)), *popt), 
