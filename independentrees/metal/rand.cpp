@@ -67,7 +67,7 @@ int main()
   char *shadersSrc = new char[582];
   shaderFile.read(shadersSrc, 582);
   shaderFile.close();
-  std::cout << shadersSrc << std::endl;
+  //std::cout << shadersSrc << std::endl;
 
   mtlpp::Library library = device.NewLibrary((const char *)shadersSrc, mtlpp::CompileOptions(), nullptr);
   delete[] shadersSrc;
