@@ -12,7 +12,7 @@ class UniformModel : public Model<TGenerator,T>
 public:
     static T draw(TGenerator *generator, const T &m)
     {
-        auto a = m - std::abs(m) + 1;
+        auto a = m - std::abs(m) - 1;
         auto b = m + std::abs(m) + 1;
 
         auto dist = TDistribution(a, b);
