@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.18)
 include_directories(.
                     ../pcg-cpp/include
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/
+                    ${CMAKE_CURRENT_SOURCE_DIR}/models/configs
                     ${CMAKE_CURRENT_SOURCE_DIR}/models/interfaces
                     ${CMAKE_CURRENT_SOURCE_DIR}/models/include)
 
