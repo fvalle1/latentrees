@@ -17,7 +17,7 @@ void makeSingleStory(std::ofstream &file, const T& first, TT &monitor){
     auto previous = first;
     bool skip_store = false;
     
-    for (int step = 0; step < 25; step++)
+    for (int step = 0; step < 50; step++)
     {
         previous = TModel::draw(generator, previous);
 
