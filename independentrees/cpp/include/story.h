@@ -56,9 +56,9 @@ void makeStories(std::ofstream &file, const T first, TT &monitorVal, const TT nS
 
 #ifndef _OPENMP
 template <typename TData, class TGenerator, class TModel>
-void run(int nStories = 120000, int nThreads = 12)
+void run(int nStories = 120000, int nThreads = 12, const char* outFilename="data.csv")
 {
-    auto file = std::ofstream("data.csv", std::ios::out);
+    auto file = std::ofstream(outFilename, std::ios::out);
 
     auto threads = std::vector<std::thread>();
     threads.reserve(nThreads);
@@ -87,21 +87,21 @@ void run(int nStories = 120000, int nThreads = 12)
 
 #else
 template <typename TData, class TGenerator, class TModel>
-void run(int nStories = 120000, int nThreads = 12)
+void run(int nStories = 120000, int nThreads = 12, const char *outFilename = "data.csv")
 {
     omp_set_num_threads(nThreads);
-    auto file = std::ofstream("data.csv", std::ios::out);
+
+    auto file = std::ofstream(outFilename, std::ios::out);
 
     unsigned int monitorVal = 0;
     const unsigned int first = 10;
     bool ended = false;
-    #pragma omp master
+    #pragma omp parallel master
     {
-        std::cout<<"using OpenMP"<<std::endl;
+        std::cout<<"using OpenMP with "<<omp_get_num_threads()<<" threads"<<std::endl;
     }
 
     MonitorThread(monitorVal, ended).detach();
-
 #pragma omp parallel for
     for (int story = 0; story < nStories; story++)
     {
