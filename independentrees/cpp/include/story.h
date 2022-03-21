@@ -14,10 +14,14 @@ std::mutex mon_mutex;
 template <typename T, typename TT, class TGenerator, class TModel>
 void makeSingleStory(std::ofstream &file, const T& first, TT &monitor){
     auto generator = new TGenerator();
-    auto previous = first;
+    auto dist = std::uniform_int_distribution<long>(0, std::numeric_limits<T>::max());
+    pcg_extras::seed_seq_from<std::random_device> seed_source;
+    auto rng = pcg64(seed_source);
+    T previous = dist(rng);
+    //auto previous = first;
     bool skip_store = false;
     
-    for (int step = 0; step < 50; step++)
+    for (int step = 0; step < 23; step++)
     {
         previous = TModel::draw(generator, previous);
 

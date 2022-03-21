@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from scipy.optimize import curve_fit
 import numpy as np
 
-data = np.genfromtxt("data.csv")
+data = np.genfromtxt("data_0.csv")
 
 #cnts = np.random.choice(data[data > 0], size=50000, replace=False)
 cnts = np.abs(data)
@@ -20,11 +20,11 @@ x = np.linspace(1, 1+len(cnts), len(cnts))
 
 fit_func = lambda x, C, alpha: C*np.power(x,alpha)
 
-popt, pcov = curve_fit(fit_func, x, cnts, p0=(0.1,-1.5), bounds=([0.0001, -3],[0.1, -0.1]))
+popt, pcov = curve_fit(fit_func, x, cnts, p0=(0.1,-1.), bounds=([0.1, -1.2],[1, -0.99]))
 
 fig = go.Figure()
 fig.add_traces([
-    go.Scatter(x=x, y=cnts, line={"width":5}, name="data (alpha=2)"),
+    go.Scatter(x=x, y=cnts, line={"width":5}, name="data"),
     #     # go.Scatter(x=x, y=cnts1, line={"width":5}, name="data"),
     go.Scatter(x = np.linspace(1, 1+len(data)),
               y = fit_func(np.linspace(1, 1+len(data)), *popt),
