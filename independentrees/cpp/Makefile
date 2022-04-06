@@ -1,7 +1,7 @@
-CC = clang
-CXX=clang++
+CC = icx
+CXX = icpx
 CFLAGS=-std=c++17 -O3 -Xclang -fopenmp
-LDFLAGS=-pthread -lomp
+LDFLAGS=-pthread -qopenmp
 OBJ=generator.o monitorThread.o model.o uniformModel.o gausModel.o nbinModel.o gammaModel.o randomwalkModel.o
 HEADERS = include/*.h models/include/*.h models/interfaces/*.h
 INCLUDE=-I../pcg-cpp/include -Imodels/interfaces -Imodels/include -Imodels/configs/ -Iinclude/
