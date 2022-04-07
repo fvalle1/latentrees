@@ -18,24 +18,28 @@ void streamToFile(std::queue<T> &buffer, const uint32_t &dataCount, std::ofstrea
   int written = 0;
   while (!ended)
   {
-    if(pushing){
+    if (pushing)
+    {
       std::this_thread::sleep_for(std::chrono::nanoseconds(1));
       continue;
     }
-    if(buffer.size()>0){
-        written++;
-        for (int i = 0; i < dataCount; i++) dataFile << buffer.front()[i] << std::endl;
-        delete[] buffer.front();
-        buffer.pop();
-   }
+    if (buffer.size() > 0)
+    {
+      written++;
+      for (int i = 0; i < dataCount; i++)
+        dataFile << buffer.front()[i] << std::endl;
+      delete[] buffer.front();
+      buffer.pop();
+    }
   }
 
   auto remaining = buffer.size();
-  std::cout << "I wrote " <<written <<" statistics"<< std::endl;
-  std::cout << "have to write "<<remaining <<" more"<< std::endl;
+  std::cout << "I wrote " << written << " statistics" << std::endl;
+  std::cout << "have to write " << remaining << " more" << std::endl;
   for (int e = 0; e < remaining; e++)
   {
-    for (int i = 0; i < dataCount; i++) dataFile << buffer.front()[i] << std::endl;
+    for (int i = 0; i < dataCount; i++)
+      dataFile << buffer.front()[i] << std::endl;
     delete[] buffer.front();
     buffer.pop();
   }
@@ -54,135 +58,109 @@ void printStatus(uint32_t &status, bool &ended)
 
 int main()
 {
-using namespace std::chrono_literals;
-    std::this_thread::sleep_for(2s);
-    mtlpp::Device device = mtlpp::Device::CreateSystemDefaultDevice();
-    assert(device);
+  using namespace std::chrono_literals;
+  std::this_thread::sleep_for(2s);
+  mtlpp::Device device = mtlpp::Device::CreateSystemDefaultDevice();
+  assert(device);
 
-    const char shadersSrc[] = R"""(
-        #include <metal_stdlib>
+  std::ifstream shaderFile("shader.metal");
+  char *shadersSrc = new char[582];
+  shaderFile.read(shadersSrc, 582);
+  shaderFile.close();
+  //std::cout << shadersSrc << std::endl;
 
-        #include "mersenne.metal"
-        #include "random.metal"
+  mtlpp::Library library = device.NewLibrary((const char *)shadersSrc, mtlpp::CompileOptions(), nullptr);
+  delete[] shadersSrc;
+  assert(library);
+  mtlpp::Function sqrFunc = library.NewFunction("storyMersenne");
+  assert(sqrFunc);
 
-        using namespace metal;
+  mtlpp::ComputePipelineState computePipelineState = device.NewComputePipelineState(sqrFunc, nullptr);
+  assert(computePipelineState);
 
-        kernel void storyMersenne(
-            const device uint *vIn [[ buffer(0) ]],
-            device int *vOut [[ buffer(1) ]],
-            uint id[[ thread_position_in_grid ]]){
-          
-          mt19937 mers;
+  mtlpp::CommandQueue commandQueue = device.NewCommandQueue();
+  assert(commandQueue);
 
-          mers.srand(vIn[id]);
-         
-          float temp = 10.0;
+  const uint32_t dataCount = 1024;
+  const uint16_t statistics = 10;
 
-          for (uint l = 0; l < 100; l++){
-              float delta = 1.0 + sqrt(3.0)*abs(temp);
-              float r = mers.rand();
-              temp = round(2*r*delta+temp-delta);
-              if(temp > 1000000000000000){
-              temp = 1000000000000000;
-              }
-          }
+  mtlpp::Buffer inBuffer = device.NewBuffer(sizeof(uint32_t) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
+  assert(inBuffer);
 
-          vOut[id] = round(temp);
-                  
-        }
+  mtlpp::Buffer outBuffer = device.NewBuffer(sizeof(int) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
+  assert(outBuffer);
 
-        
-    )""";
+  std::ofstream dataFile;
+  dataFile.open("randoms.dat", std::ios::out /*| std::ios::app*/);
+  if (!dataFile.is_open())
+  {
+    std::cerr << "File to store data not opened" << std::endl;
+    return -1;
+  }
 
-    mtlpp::Library library = device.NewLibrary(shadersSrc, mtlpp::CompileOptions(), nullptr);
-    assert(library);
-    mtlpp::Function sqrFunc = library.NewFunction("storyMersenne");
-    assert(sqrFunc);
+  uint32_t i = 0;
+  bool ended = false;
+  bool pushing = false;
+  auto tPrint = std::thread(printStatus, std::ref(i), std::ref(ended));
+  tPrint.detach();
 
-    mtlpp::ComputePipelineState computePipelineState = device.NewComputePipelineState(sqrFunc, nullptr);
-    assert(computePipelineState);
+  std::queue<int *> buffer;
+  auto tWrite = std::thread(streamToFile<int *>, std::ref(buffer), std::ref(dataCount), std::ref(dataFile), std::ref(ended), std::ref(pushing));
 
-    mtlpp::CommandQueue commandQueue = device.NewCommandQueue();
-    assert(commandQueue);
-
-    const uint32_t dataCount = 1024;
-    const uint16_t statistics = 10;
-
-    mtlpp::Buffer inBuffer = device.NewBuffer(sizeof(uint32_t) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
-    assert(inBuffer);
-
-    mtlpp::Buffer outBuffer = device.NewBuffer(sizeof(int) * dataCount, mtlpp::ResourceOptions::StorageModeManaged);
-    assert(outBuffer);
-
-    std::ofstream dataFile;
-    dataFile.open("randoms.dat", std::ios::out /*| std::ios::app*/);
-    if(!dataFile.is_open()){
-      std::cerr<<"File to store data not opened"<<std::endl;
-      return -1;
-    }
-
-    uint32_t i = 0;
-    bool ended = false;
-    bool pushing = false;
-    auto tPrint = std::thread(printStatus, std::ref(i), std::ref(ended));
-    tPrint.detach();
-
-    std::queue<int*> buffer;
-    auto tWrite = std::thread(streamToFile<int *>, std::ref(buffer), std::ref(dataCount), std::ref(dataFile), std::ref(ended), std::ref(pushing));
-
-    auto gpu_start = std::chrono::steady_clock::now();
-    for (; i < statistics; i++)
+  auto gpu_start = std::chrono::steady_clock::now();
+  for (; i < statistics; i++)
+  {
+    // update input data
     {
-      // update input data
-      {
-        float *inData = static_cast<float *>(inBuffer.GetContents());
-        for (uint32_t j = 0; j < dataCount; j++)
-          inData[j] = i * dataCount + j;
-        inBuffer.DidModify(ns::Range(0, sizeof(float) * dataCount));
-      }
-
-      mtlpp::CommandBuffer commandBuffer = commandQueue.CommandBuffer();
-      assert(commandBuffer);
-
-      mtlpp::ComputeCommandEncoder commandEncoder = commandBuffer.ComputeCommandEncoder();
-      commandEncoder.SetBuffer(inBuffer, 0, 0);
-      commandEncoder.SetBuffer(outBuffer, 0, 1);
-      commandEncoder.SetComputePipelineState(computePipelineState);
-      commandEncoder.DispatchThreadgroups(
-          mtlpp::Size(1, 1, 1),
-          mtlpp::Size(dataCount, 1, 1));
-      commandEncoder.EndEncoding();
-
-      mtlpp::BlitCommandEncoder blitCommandEncoder = commandBuffer.BlitCommandEncoder();
-      blitCommandEncoder.Synchronize(outBuffer);
-      blitCommandEncoder.EndEncoding();
-
-      commandBuffer.Commit();
-      commandBuffer.WaitUntilCompleted();
-
-    
-        // read the data
-        {
-            //float* inData = static_cast<float*>(inBuffer.GetContents());
-            auto outData = static_cast<int*>(outBuffer.GetContents());
-            // for (uint32_t j=0; j<dataCount; j++){
-          	// 	/*if (j%(dataCount/10)==0){
-            //               	printf("sqr(%g) = %g\n", inData[j], outData[j]);
-          	// 	}*/
-            //   dataFile<<outData[j]<<std::endl;
-            // }
-            pushing = true;
-            auto newplace = new int[dataCount];
-            std::memcpy(newplace, std::move(outData), dataCount*sizeof(int));
-            buffer.push(newplace);
-            pushing = false;
-      }
+      float *inData = static_cast<float *>(inBuffer.GetContents());
+      for (uint32_t j = 0; j < dataCount; j++)
+        inData[j] = i * dataCount + j;
+      inBuffer.DidModify(ns::Range(0, sizeof(float) * dataCount));
     }
 
-    ended = true;
+    mtlpp::CommandBuffer commandBuffer = commandQueue.CommandBuffer();
+    assert(commandBuffer);
 
-  if (tWrite.joinable()){
-    std::cout<<std::endl<<"Waiting all threads to finish"<<std::endl;
+    mtlpp::ComputeCommandEncoder commandEncoder = commandBuffer.ComputeCommandEncoder();
+    commandEncoder.SetBuffer(inBuffer, 0, 0);
+    commandEncoder.SetBuffer(outBuffer, 0, 1);
+    commandEncoder.SetComputePipelineState(computePipelineState);
+    commandEncoder.DispatchThreadgroups(
+        mtlpp::Size(1, 1, 1),
+        mtlpp::Size(dataCount, 1, 1));
+    commandEncoder.EndEncoding();
+
+    mtlpp::BlitCommandEncoder blitCommandEncoder = commandBuffer.BlitCommandEncoder();
+    blitCommandEncoder.Synchronize(outBuffer);
+    blitCommandEncoder.EndEncoding();
+
+    commandBuffer.Commit();
+    commandBuffer.WaitUntilCompleted();
+
+    // read the data
+    {
+      //float* inData = static_cast<float*>(inBuffer.GetContents());
+      auto outData = static_cast<int *>(outBuffer.GetContents());
+      // for (uint32_t j=0; j<dataCount; j++){
+      // 	/*if (j%(dataCount/10)==0){
+      //               	printf("sqr(%g) = %g\n", inData[j], outData[j]);
+      // 	}*/
+      //   dataFile<<outData[j]<<std::endl;
+      // }
+      pushing = true;
+      auto newplace = new int[dataCount];
+      std::memcpy(newplace, std::move(outData), dataCount * sizeof(int));
+      buffer.push(newplace);
+      pushing = false;
+    }
+  }
+
+  ended = true;
+
+  if (tWrite.joinable())
+  {
+    std::cout << std::endl
+              << "Waiting all threads to finish" << std::endl;
     tWrite.join();
   };
 

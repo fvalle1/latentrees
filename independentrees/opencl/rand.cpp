@@ -85,7 +85,18 @@ int main(void) {
   }
 
   const char* file_name = "random.cl";
+
+#ifdef __APPLE__
   auto program = clCreateProgramWithSource(context,1, &file_name, NULL, &err);
+#else
+  std::ifstream shaderFile(file_name);
+  char *shadersSrc = new char[2048];
+  shaderFile.read(shadersSrc, 2048);
+  shaderFile.close();
+  std::cout << shadersSrc << std::endl;
+  auto program = clCreateProgramWithSource(context, 1, (const char**)&shadersSrc, NULL, &err);
+
+#endif
   if (err != 0)
   {
     std::cerr << "Error clCreateProgramWithSource" << endl;
@@ -93,7 +104,7 @@ int main(void) {
   }
 
   const uint32_t DATA_SIZE = 1024;
-  const uint16_t statistics = 10;
+  const uint16_t statistics = 1000;
 
   //cl_program program = clCreateProgramWithSource(context, 1, (const char **) & KernelSource, NULL, &err);
   clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
