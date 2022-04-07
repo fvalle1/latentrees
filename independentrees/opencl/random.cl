@@ -38,6 +38,7 @@ __kernel void storyMersenne(__global float *vIn, __global float *vOut, const uns
         rng_state = rand_xorshift(rng_state);
         float r = 0.5 + rng_state * (1.0 / 4294967296.0);
         temp = round(2*r*delta+temp-delta);
+        //temp = 1+2 * temp * r;
         if(temp > 1000000000000000){
         temp = 1000000000000000;
         }

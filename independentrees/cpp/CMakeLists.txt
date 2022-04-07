@@ -19,7 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 set(LAT_FILES src/generator.cpp src/monitorThread.cpp)
-set(MODELS models/uniformModel.cpp models/gausModel.cpp models/nbinModel.cpp models/gammaModel.cpp models/model.cpp)
+set(MODELS models/uniformModel.cpp models/gausModel.cpp models/nbinModel.cpp models/gammaModel.cpp models/randomwalkModel.cpp models/model.cpp)
 
 add_executable(lat
     main.cpp
