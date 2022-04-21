@@ -2,7 +2,7 @@ CXX = clang++
 
 LIBS = -L.
 FLAGS = -std=c++17 -O3
-INCLUDE = -I../pcg-cpp/include
+INCLUDE = -I${HOME}/Developer/pcg-cpp/include
 FRAMEWORKS = OpenCL
 
 all: rand.out

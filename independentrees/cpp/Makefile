@@ -4,7 +4,7 @@ CFLAGS=-std=c++17 -O3 -Xclang -fopenmp
 LDFLAGS=-pthread -lomp
 OBJ=generator.o monitorThread.o model.o uniformModel.o gausModel.o nbinModel.o gammaModel.o randomwalkModel.o
 HEADERS = include/*.h models/include/*.h models/interfaces/*.h
-INCLUDE=-I../pcg-cpp/include -Imodels/interfaces -Imodels/include -Imodels/configs/ -Iinclude/
+INCLUDE=-I$${HOME}/Developer/pcg-cpp/include -Imodels/interfaces -Imodels/include -Imodels/configs/ -Iinclude/
 
 lat.out: main.cpp $(OBJ) $(HEADERS)
 	$(CXX) $(INCLUDE) $(CFLAGS) $(LDFLAGS) $< $(OBJ) -o $@
